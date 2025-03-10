@@ -3,6 +3,9 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
+	"sort"
 	"strconv"
 	"time"
 
@@ -19,20 +22,61 @@ func main() {
 	// 初始化路由管理
 	routeManager := NewRouteManager()
 
-	// 初始加载路由
-	loadRoutes := func() {
-		newRoutes, err := ParseDirectory(cfg.APIPath)
+	// 初始化加载（保持文件加载顺序）
+	initRoutes := func() {
+		files, err := os.ReadDir(cfg.APIPath)
 		if err != nil {
-			log.Printf("Error parsing directory: %v", err)
-			return
+			log.Fatal(err)
 		}
-		routeManager.UpdateRoutes(newRoutes)
-		log.Println("Routes reloaded")
-	}
-	loadRoutes()
 
-	// 启动文件监听
-	go WatchDirectory(cfg.APIPath, loadRoutes)
+		// 按文件名排序加载
+		sort.Slice(files, func(i, j int) bool {
+			return files[i].Name() < files[j].Name()
+		})
+
+		for _, f := range files {
+			if filepath.Ext(f.Name()) == ".json" {
+				filePath := filepath.Join(cfg.APIPath, f.Name())
+				routes, err := ParseFile(filePath)
+				if err != nil {
+					log.Printf("Error parsing %s: %v", filePath, err)
+					continue
+				}
+				routeManager.UpdateFileRoutes(filePath, routes)
+			}
+		}
+	}
+	initRoutes()
+
+	// 文件变化处理函数
+	handleFileChanges := func(files []string) {
+		for _, filePath := range files {
+			// 检查文件是否已被删除
+			if _, err := os.Stat(filePath); os.IsNotExist(err) {
+				routeManager.RemoveFile(filePath)
+				log.Printf("Removed routes for deleted file: %s", filePath)
+				continue
+			}
+
+			// 只处理JSON文件
+			if filepath.Ext(filePath) != ".json" {
+				continue
+			}
+
+			// 解析并更新路由
+			routes, err := ParseFile(filePath)
+			if err != nil {
+				log.Printf("Error reloading %s: %v", filePath, err)
+				continue
+			}
+
+			routeManager.UpdateFileRoutes(filePath, routes)
+			log.Printf("Updated routes from: %s", filePath)
+		}
+	}
+
+	// 启动带防抖的文件监听（1秒）
+	go WatchDirectory(cfg.APIPath, time.Second, handleFileChanges)
 
 	// 创建Echo实例
 	e := echo.New()
