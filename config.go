@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Config struct {
+type config struct {
 	Port    int
 	APIPath string
 }
 
-func LoadConfig() (*Config, error) {
+func LoadConfig() (*config, error) {
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
 	viper.SetDefault("port", 18080)
@@ -21,7 +21,7 @@ func LoadConfig() (*Config, error) {
 		}
 	}
 
-	return &Config{
+	return &config{
 		Port:    viper.GetInt("port"),
 		APIPath: viper.GetString("api_path"),
 	}, nil

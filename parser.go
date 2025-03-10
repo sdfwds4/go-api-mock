@@ -22,13 +22,13 @@ type RequestResponse struct {
 	} `json:"response"`
 }
 
-func ParseDirectory(dir string) (map[string]map[string]*ResponseConfig, error) {
+func ParseDirectory(dir string) (map[string]map[string]*responseConfig, error) {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
 
-	routes := make(map[string]map[string]*ResponseConfig)
+	routes := make(map[string]map[string]*responseConfig)
 
 	for _, f := range files {
 		if filepath.Ext(f.Name()) == ".json" {
@@ -51,10 +51,10 @@ func ParseDirectory(dir string) (map[string]map[string]*ResponseConfig, error) {
 				path := item.Request.URL
 
 				if _, ok := routes[method]; !ok {
-					routes[strings.ToLower(method)] = make(map[string]*ResponseConfig)
+					routes[strings.ToLower(method)] = make(map[string]*responseConfig)
 				}
 
-				routes[strings.ToLower(method)][path] = &ResponseConfig{
+				routes[strings.ToLower(method)][path] = &responseConfig{
 					Code:  item.Response.Code,
 					Delay: time.Duration(item.Response.Delay) * time.Millisecond,
 					Body:  item.Response.Body,
@@ -67,7 +67,7 @@ func ParseDirectory(dir string) (map[string]map[string]*ResponseConfig, error) {
 }
 
 // 新增单个文件解析方法
-func ParseFile(filePath string) (map[string]map[string]*ResponseConfig, error) {
+func ParseFile(filePath string) (map[string]map[string]*responseConfig, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, err
@@ -85,10 +85,10 @@ func ParseFile(filePath string) (map[string]map[string]*ResponseConfig, error) {
 		path := item.Request.URL
 
 		if _, ok := routes[method]; !ok {
-			routes[method] = make(map[string]*ResponseConfig)
+			routes[method] = make(map[string]*responseConfig)
 		}
 
-		routes[method][path] = &ResponseConfig{
+		routes[method][path] = &responseConfig{
 			Code:  item.Response.Code,
 			Delay: time.Duration(item.Response.Delay) * time.Millisecond,
 			Body:  item.Response.Body,

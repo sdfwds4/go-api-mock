@@ -20,7 +20,7 @@ func main() {
 	}
 
 	// 初始化路由管理
-	routeManager := NewRouteManager()
+	routeManager := newRouteManager()
 
 	// 初始化加载（保持文件加载顺序）
 	initRoutes := func() {

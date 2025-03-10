@@ -6,40 +6,40 @@ import (
 	"time"
 )
 
-type ResponseConfig struct {
+type responseConfig struct {
 	Code  int
 	Delay time.Duration
 	Body  interface{}
 }
 
-type FileRoutes map[string]map[string]*ResponseConfig // method -> path -> config
-type RouteManager struct {
+type FileRoutes map[string]map[string]*responseConfig // method -> path -> config
+type routeManager struct {
 	mu         sync.RWMutex
 	fileRoutes map[string]FileRoutes // 文件路径 -> 路由配置
 }
 
-func NewRouteManager() *RouteManager {
-	return &RouteManager{
+func newRouteManager() *routeManager {
+	return &routeManager{
 		fileRoutes: make(map[string]FileRoutes),
 	}
 }
 
 // 更新单个文件的路由配置
-func (rm *RouteManager) UpdateFileRoutes(file string, routes FileRoutes) {
+func (rm *routeManager) UpdateFileRoutes(file string, routes FileRoutes) {
 	rm.mu.Lock()
 	defer rm.mu.Unlock()
 	rm.fileRoutes[file] = routes
 }
 
 // 删除指定文件的路由配置
-func (rm *RouteManager) RemoveFile(file string) {
+func (rm *routeManager) RemoveFile(file string) {
 	rm.mu.Lock()
 	defer rm.mu.Unlock()
 	delete(rm.fileRoutes, file)
 }
 
 // 获取路由配置（按文件名排序，后加载的文件优先级更高）
-func (rm *RouteManager) GetConfig(method, path string) *ResponseConfig {
+func (rm *routeManager) GetConfig(method, path string) *responseConfig {
 	rm.mu.RLock()
 	defer rm.mu.RUnlock()
 
