@@ -47,7 +47,7 @@ func (dw *DebouncedWatcher) AddEvent(path string) {
 	})
 }
 
-func WatchDirectory(dir string, debounce time.Duration, callback func(files []string)) {
+func watchDirectory(dir string, debounce time.Duration, callback func(files []string)) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Fatal(err)

@@ -9,7 +9,7 @@ type config struct {
 	APIPath string
 }
 
-func LoadConfig() (*config, error) {
+func loadConfig() (*config, error) {
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
 	viper.SetDefault("port", 18080)
