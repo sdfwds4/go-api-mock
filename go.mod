@@ -3,6 +3,7 @@ module github.com/sdfwds4/go-api-mock
 go 1.23.6
 
 require (
+	github.com/fatih/color v1.18.0
 	github.com/fsnotify/fsnotify v1.8.0
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/spf13/viper v1.19.0

@@ -9,7 +9,23 @@ import (
 	"sort"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/labstack/echo/v4"
+)
+
+const (
+	Version = "1.1.3"
+	website = "https://github.com/sdfwds4/go-api-mock"
+	banner  = `
+  ___   __      __   ____  __    _  _   __    ___  __ _ 
+ / __) /  \    / _\ (  _ \(  )  ( \/ ) /  \  / __)(  / )
+( (_ \(  O )  /    \ ) __/ )(   / \/ \(  O )( (__  )  ( 
+ \___/ \__/   \_/\_/(__)  (__)  \_)(_/ \__/  \___)(__\_) %s
+Easy to use, minimalist api mock server
+%s
+____________________________________O/_______
+                                    O\
+`
 )
 
 func main() {
@@ -49,6 +65,11 @@ func InitializeApplication() (*Application, error) {
 }
 
 func (app *Application) Run() {
+	if app.cfg.ShowLogo {
+		blue := color.New(color.FgBlue).SprintFunc()
+		yellow := color.New(color.FgRed).SprintFunc()
+		fmt.Printf(banner, yellow("v"+Version), blue(website))
+	}
 	address := fmt.Sprintf(":%d", app.cfg.Port)
 	if err := app.echo.Start(address); err != nil && err != http.ErrServerClosed {
 		app.echo.Logger.Fatal("Shutting down the server")
@@ -82,6 +103,7 @@ func initRoutes(rm *routeManager, apiPath string) error {
 
 func setupEchoServer(rm *routeManager) *echo.Echo {
 	e := echo.New()
+	e.HideBanner = true
 	e.Any("*", func(c echo.Context) error {
 		// 获取请求信息
 		method := c.Request().Method
