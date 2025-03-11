@@ -1,11 +1,13 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"time"
 
@@ -28,7 +30,36 @@ ____________________________________O/_______
 `
 )
 
+var (
+	showVersion bool
+)
+
+func printVersion() {
+	fmt.Printf(`
+%s %s
+	
+• Build:   %s
+• Go:      %s %s/%s
+• Docs:    %s
+`,
+		"go api mock",
+		Version,
+		time.Now().Format("2006-01-02 15:04:05"),
+		runtime.Version(),
+		runtime.GOOS,
+		runtime.GOARCH,
+		website,
+	)
+}
+
 func main() {
+	flag.BoolVar(&showVersion, "v", false, "Show version info")
+	flag.Parse()
+
+	if showVersion {
+		printVersion()
+		os.Exit(0)
+	}
 	app, err := InitializeApplication()
 	if err != nil {
 		log.Fatalf("Failed to initialize: %v", err)
