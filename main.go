@@ -143,6 +143,7 @@ func setupEchoServer(rm *routeManager) *echo.Echo {
 		// 查找路由配置
 		config := rm.GetConfig(method, path)
 		if config == nil {
+			log.Printf("%s %s %d", method, path, http.StatusNotFound)
 			return c.JSON(http.StatusNotFound, map[string]string{"error": "Not found"})
 		}
 
@@ -152,6 +153,7 @@ func setupEchoServer(rm *routeManager) *echo.Echo {
 		}
 
 		// 返回响应
+		log.Printf("%s %s %d ⇨ %s", method, path, config.Code, path)
 		return c.JSON(config.Code, config.Body)
 	})
 	return e
